@@ -10,9 +10,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
     <link rel="stylesheet" href="css/reveal.css">
-    <link rel="stylesheet" href="css/theme/night.css" id="theme">
+    <link rel="stylesheet" href="css/theme/moon.css" id="theme">
     <!-- Code syntax highlighting -->
-    <link rel="stylesheet" href="lib/css/zenburn.css">
+    <link rel="stylesheet" href="lib/css/obsidian.css">
     <!-- Printing and PDF exports -->
     <script>
       var link = document.createElement( 'link' );
@@ -39,7 +39,7 @@
           <section data-markdown>
             <script type="text/template">
               ## Basics
-              Scala is __static__
+              Types in Scala are __static__
               ```scala
               class Coffee
               class Tea
@@ -52,7 +52,7 @@
           <section data-markdown>
             <script type="text/template">
               ## Basics
-              Scala is __strong__
+              Types in Scala are __strong__
               ```scala
               class Coffee
               class Tea
@@ -65,13 +65,129 @@
           <section data-markdown>
             <script type="text/template">
               ## Basics
-              Scala is __inferred__
+              Types in Scala can be __inferred__
               ```scala
               class Coffee
               class Tea
 
               val coffee = new Coffee
               val tea = new Tea
+
+              def describe(coffee: Coffee) = "Aromatic"
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Type Alias
+              ```scala
+              type Task = String
+              type HoursSpent = Int
+
+              val x: Map[String, Int]
+
+              val y: Map[Task, HoursSpent]
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Class
+              ```scala
+              class Coffee {
+                def create(): Coffee
+              }
+
+              class Tea {
+                def create(): Tea
+              }
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Trait
+              Similar to interfaces in Java.
+              ```scala
+              trait Beverage {
+                def create(): Beverage
+              }
+
+              class Coffee extends Beverage
+
+              class Tea extends Beverage
+              ```
+              <br>
+              ```scala
+              class Water extends Beverage {
+                def create(): Coffee
+              }
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Type Parameters
+              Allows us to write generic classes and traits.
+              ```scala
+              trait Beverage[A] {
+                def create(): A
+              }
+
+              class Coffee extends Beverage[Coffee]
+
+              class Tea extends Beverage[Tea]
+              ```
+              <br>
+              ```scala
+              class Water
+
+              // valid
+              class Coffee extends Beverage[Water]
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Recursive Type
+              Constraints the subtypes to themselves using bounds.
+              ```scala
+              trait Beverage[A <: Beverage[A]] {
+                def create(): A
+              }
+
+              class Coffee extends Beverage[Coffee]
+
+              class Tea extends Beverage[Tea]
+              ```
+              <br>
+              ```scala
+              // compilation error
+              class Coffee extends Beverage[Water]
+
+              // valid
+              class Tea extends Beverage[Coffee]
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Self Type
+              ```scala
+              trait Beverage[A <: Beverage[A]] { self: A =>
+                def create(): A
+              }
+
+              class Coffee extends Beverage[Coffee]
+
+              class Tea extends Beverage[Tea]
+              ```
+              Ensures that any class that extends ``Beverage`` is of type ``A``.
+
+              <br>
+              ```scala
+              // compilation error
+              class Tea extends Beverage[Coffee]
               ```
             </script>
           </section>
@@ -82,116 +198,177 @@
             <script type="text/template">
               ## Type Parameters
               ```scala
-              class Grinder[A](val substance: A)
               class Salt
               class Pepper
-              class Coffee
 
-              val saltGrinder: Grinder[Salt] = new Grinder[Salt](new Salt)
-              val pepperGrinder = new Grinder[Pepper](new Pepper)
-              val coffeeGrinder = new Grinder(new Coffee)
+              trait Grinder[A]
+              ```
+
+              ```scala
+              class SaltGrinder extends Grinder[Salt]
+
+              class PepperGrinder extends Grinder[Pepper]
               ```
             </script>
           </section>
           <section data-markdown>
             <script type="text/template">
-              ## Variance
+              ## Abstract Type Members
               ```scala
-              class NaturalNumber
-              class Integer extends NaturalNumber
+              class Salt
+              class Pepper
 
-              abstract class Reader[NaturalNumber] {
-                def read(): NaturalNumber
-              }
-
-              val r_natural: Reader[NaturalNumber] = new Reader[NaturalNumber] {
-                def read(): NaturalNumber = new NaturalNumber
-              }
-
-              val r_integer: Reader[Integer] = new Reader[Integer] {
-                def read(): Integer = new Integer
+              trait Grinder {
+                type A
               }
               ```
 
               ```scala
-              val r: Reader[Integer] = r_integer
+              class SaltGrinder extends Grinder{
+                type A = Salt
+              }
 
-              val r1: Reader[Integer] = r_natural         // Compilation error
+              class PepperGrinder extends Grinder {
+                type A = Pepper
+              }
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Abstract Type Members
+              ```scala
+              class Salt
+              class Pepper
+              class BlackPepper extends Pepper
 
-              val r2: Reader[NaturalNumber] = r_integer   // Compilation error
+              trait PepperGrinder {
+                type A <: Pepper
+              }
+              ```
+
+              ```scala
+              class SaltGrinder extends PepperGrinder{
+                type A = Salt            // Compilation Error
+              }
+
+              class BlackPepperGrinder extends PepperGrinder {
+                type A = BlackPepper     // Valid
+              }
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Abstract Type Members
+              ```scala
+              class Pepper
+              class BlackPepper extends Pepper
+
+              trait Grinder {
+                type A
+              }
+
+              trait OnlyPepper {
+                type A <: Pepper
+              }
+              ```
+
+              ```scala
+              class BlackPepperGrinder extends Grinder with OnlyPepper {
+                type A = BlackPepper    
+              }
+              ```
+            </script>
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Variance
+              ```scala
+              // 0, 1, 2, ...
+              class NaturalNumber
+              // ..., -2, -1, 0, 1, 2, ...
+              class Integer extends NaturalNumber 
+
+              trait Reader[NaturalNumber] {
+                def read(): NaturalNumber
+              }
+
+              class NaturalNumberReader extends Reader[NaturalNumber]
+
+              class IntegerReader extends Reader[Integer]
+              ```
+
+              ```scala
+              val r_natural: NaturalNumberReader = new NaturalNumberReader {
+                def read(): NaturalNumber = /// Implementation here
+              }
+
+              val r_integer: IntegerReader = new IntegerReader {
+                def read(): Integer = /// Implementation here
+              }
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## In-Variant
+              By default, Type Parameter in Scala is ___In-Variant___.
+              ```scala
+              val r1: IntegerReader = r_integer
+
+              val r2: NaturalNumberReader = r_natural
+
+              val n: NaturalNumber = new Integer        // Valid
+              val r3: NaturalNumberReader = r_integer   // Compilation error
+
+              val r4: IntegerReader = r_natural         // Compilation error
               ```
             </script>
           </section>
           <section data-markdown>
             <script type="text/template">
               ## Co-Variant
+              If ``Integer`` extends ``NaturalNumber``, then ``Reader[Integer]`` extends ``Reader[NaturalNumber]``.
               ```scala
-              abstract class Reader[+NaturalNumber] {
+              // 0, 1, 2, ...
+              class NaturalNumber
+              // ..., -2, -1, 0, 1, 2, ...
+              class Integer extends NaturalNumber 
+
+              trait Reader[+NaturalNumber] {
                 def read(): NaturalNumber
               }
+
+              class NaturalNumberReader extends Reader[NaturalNumber]
+              class IntegerReader extends Reader[Integer]
               ```
-              __Co-Variant__ subtyping means if ``Integer`` is a subtype of ``NaturalNumber`` then ``Reader[Integer]`` is a subtype of ``Reader[NaturalNumber]``.
 
               ```scala
-              class NaturalNumber
-              class Integer extends NaturalNumber
-
-              val rb: Reader[B] = new Reader[B] {
-                def read(): B = /// Implementation here
-              }
-
-              val r_integer: Reader[Integer] = new Reader[Integer] {
+              val r_integer: IntegerReader = new IntegerReader {
                 def read(): Integer = /// Implementation here
               }
 
-              val r2: Reader[NaturalNumber] = r_integer
-              ```
-            </script>
-          </section>
-          <section data-markdown>
-            <script type="text/template">
-              ## Variance
-              ```scala
-              class NaturalNumber
-              class Integer extends NaturalNumber
-
-              abstract class Writer[NaturalNumber] {
-                def write(): Unit
-              }
-
-              val w_natural: Writer[NaturalNumber] = new Writer[NaturalNumber] {
-                def write(): Unit = /// Implementation here
-              }
-
-              val w_integer: Writer[Integer] = new Writer[Integer] {
-                def write(): Unit = /// Implementation here
-              }
-
-              val w1: Writer[NaturalNumber] = w_integer    // Compiler error
-
-              val w2: Writer[Integer] = w_natural    // Compiler error
+              val r: NaturalNumberReader = r_integer
               ```
             </script>
           </section>
           <section data-markdown>
             <script type="text/template">
               ## Contra-Variant
+              If ``Integer`` is a subtype of ``NaturalNumber`` then ``Writer[NaturalNumber]`` is a subtype of ``Writer[Integer]``.
               ```scala
-              abstract class Writer[-NaturalNumber] {
+              // 0, 1, 2, ...
+              class NaturalNumber
+              // ..., -2, -1, 0, 1, 2, ...
+              class Integer extends NaturalNumber 
+
+              trait Writer[-NaturalNumber] {
                 def write(): Unit
               }
-              ```
-              __Contra-Variant__ subtyping means if ``Integer`` is a subtype of ``NaturalNumber`` then ``Writer[NaturalNumber]`` is a subtype of ``Writer[Integer]``.
-
-              ```scala
-              class NaturalNumber
-              class Integer extends NaturalNumber
-
-              val w_natural: Writer[NaturalNumber] = new Writer[NaturalNumber] {
-                def write(): Unit = /// Implementation here
-              }
-
-              val w2: Writer[Integer] = w_natural    // Compiler error
               ```
             </script>
           </section>
@@ -202,7 +379,95 @@
 
               ```scala
               List[A] ?
+              Function[A, B] ?
               Either[A, B] ?
+              ```
+            </script>
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Ad-Hoc Polymorphism
+
+              ```scala
+              trait Writer[+A] {
+                def write: A
+              }
+
+              case class IntegerWriter(i: Integer) extends Writer[Integer] {
+                def write = i.toString
+              }
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Ad-Hoc Polymorphism
+
+              ```scala
+              List(1, 2, 3, ...)
+              List(1.5, 2.5, 3.5, ...)
+
+              trait Product[A] {
+                def identity: A
+                def operation(a: A, b: A): A
+              }
+              ```
+            </script>
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Phantom Types and Bounds
+
+              ```scala
+              trait Writer[A] {
+                def write: A
+              }
+
+              case class IntegerWriter(i: Integer) extends Writer[Integer] {
+                def write = i.toString
+              }
+              ```
+            </script>
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Structural Type
+
+              ```scala
+              trait Writer[A] {
+                def write: A
+              }
+
+              case class IntegerWriter(i: Integer) extends Writer[Integer] {
+                def write = i.toString
+              }
+              ```
+            </script>
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Path Dependent Type and Type Projection
+
+              ```scala
+              trait Writer[A] {
+                def write: A
+              }
+
+              case class IntegerWriter(i: Integer) extends Writer[Integer] {
+                def write = i.toString
+              }
               ```
             </script>
           </section>
@@ -231,7 +496,7 @@
         history: true,
         center: true,
 
-        transition: 'slide', // none/fade/slide/convex/concave/zoom
+        transition: 'convex', // none/fade/slide/convex/concave/zoom
 
         // Optional reveal.js plugins
         dependencies: [

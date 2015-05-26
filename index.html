@@ -79,19 +79,6 @@
           </section>
           <section data-markdown>
             <script type="text/template">
-              ## Type Alias
-              ```scala
-              type Task = String
-              type HoursSpent = Int
-
-              val x: Map[String, Int]
-
-              val y: Map[Task, HoursSpent]
-              ```
-            </script>
-          </section>
-          <section data-markdown>
-            <script type="text/template">
               ## Class
               ```scala
               class Coffee {
@@ -113,14 +100,12 @@
                 def create(): Beverage
               }
 
-              class Coffee extends Beverage
+              class Coffee extends Beverage {
+                def create() = new Coffee
+              }
 
-              class Tea extends Beverage
-              ```
-              <br>
-              ```scala
-              class Water extends Beverage {
-                def create(): Coffee
+              class Tea extends Beverage {
+                def create() = new Tea
               }
               ```
             </script>
@@ -128,7 +113,7 @@
           <section data-markdown>
             <script type="text/template">
               ## Type Parameters
-              Allows us to write generic classes and traits.
+              Allow us to write generic classes and traits.
               ```scala
               trait Beverage[A] {
                 def create(): A
@@ -138,150 +123,45 @@
 
               class Tea extends Beverage[Tea]
               ```
-              <br>
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Abstract Type Members
               ```scala
-              class Water
+              trait Beverage {
+                type A
+                def create(): A
+              }
 
-              // valid
-              class Coffee extends Beverage[Water]
+              class Coffee extends Beverage {
+                type A = Coffee
+              }
+
+              class Tea extends Beverage {
+                type A = Tea
+              }
               ```
             </script>
           </section>
           <section data-markdown>
             <script type="text/template">
-              ## Recursive Type
-              Constraints the subtypes to themselves using bounds.
+              ## Type Alias
+              A trick to write more readable code. Instead of writing:
               ```scala
-              trait Beverage[A <: Beverage[A]] {
-                def create(): A
-              }
-
-              class Coffee extends Beverage[Coffee]
-
-              class Tea extends Beverage[Tea]
+              val x: Map[String, Int]
               ```
-              <br>
+              We can make it more readable by writing: 
               ```scala
-              // compilation error
-              class Coffee extends Beverage[Water]
+              type Task = String
+              type HoursSpent = Int
 
-              // valid
-              class Tea extends Beverage[Coffee]
-              ```
-            </script>
-          </section>
-          <section data-markdown>
-            <script type="text/template">
-              ## Self Type
-              ```scala
-              trait Beverage[A <: Beverage[A]] { self: A =>
-                def create(): A
-              }
-
-              class Coffee extends Beverage[Coffee]
-
-              class Tea extends Beverage[Tea]
-              ```
-              Ensures that any class that extends ``Beverage`` is of type ``A``.
-
-              <br>
-              ```scala
-              // compilation error
-              class Tea extends Beverage[Coffee]
+              val y: Map[Task, HoursSpent]
               ```
             </script>
           </section>
         </section>
 
-        <section>
-          <section data-markdown>
-            <script type="text/template">
-              ## Type Parameters
-              ```scala
-              class Salt
-              class Pepper
-
-              trait Grinder[A]
-              ```
-
-              ```scala
-              class SaltGrinder extends Grinder[Salt]
-
-              class PepperGrinder extends Grinder[Pepper]
-              ```
-            </script>
-          </section>
-          <section data-markdown>
-            <script type="text/template">
-              ## Abstract Type Members
-              ```scala
-              class Salt
-              class Pepper
-
-              trait Grinder {
-                type A
-              }
-              ```
-
-              ```scala
-              class SaltGrinder extends Grinder{
-                type A = Salt
-              }
-
-              class PepperGrinder extends Grinder {
-                type A = Pepper
-              }
-              ```
-            </script>
-          </section>
-          <section data-markdown>
-            <script type="text/template">
-              ## Abstract Type Members
-              ```scala
-              class Salt
-              class Pepper
-              class BlackPepper extends Pepper
-
-              trait PepperGrinder {
-                type A <: Pepper
-              }
-              ```
-
-              ```scala
-              class SaltGrinder extends PepperGrinder{
-                type A = Salt            // Compilation Error
-              }
-
-              class BlackPepperGrinder extends PepperGrinder {
-                type A = BlackPepper     // Valid
-              }
-              ```
-            </script>
-          </section>
-          <section data-markdown>
-            <script type="text/template">
-              ## Abstract Type Members
-              ```scala
-              class Pepper
-              class BlackPepper extends Pepper
-
-              trait Grinder {
-                type A
-              }
-
-              trait OnlyPepper {
-                type A <: Pepper
-              }
-              ```
-
-              ```scala
-              class BlackPepperGrinder extends Grinder with OnlyPepper {
-                type A = BlackPepper    
-              }
-              ```
-            </script>
-          </section>
-        </section>
 
         <section>
           <section data-markdown>
@@ -372,15 +252,140 @@
               ```
             </script>
           </section>
+        </section>
+
+
+        <section>
           <section data-markdown>
             <script type="text/template">
-              ## Variance
-              By default, functions in scala are __In-Variant__ on type parameters, __Co-Variant__ on return type and __Contra-Variant__ on parameter.
+              ## Ad-Hoc Polymorphism
+              Assume the following are from third party library:
+              ```scala
+              class Coffee
+
+              class Cake
+
+              class Calories(val value: Double)
+              ```
+              <br>
 
               ```scala
-              List[A] ?
-              Function[A, B] ?
-              Either[A, B] ?
+              def consumeCoffee(coffee: Coffee) = new Calories(10.5)
+
+              def consumeCake(cake: Cake) = new Calories(223.0)
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Ad-Hoc Polymorphism
+              ```scala
+              trait Consumable[A] {
+                def hasCalories(consumable: A): Calories
+              }
+
+              object CoffeeConsumable extends Consumable[Coffee] {
+                def hasCalories(consumable: Coffee) = new Calories(10.5)
+              }
+
+              object CakeConsumable extends Consumable[Cake] {
+                def hasCalories(consumable: Cake) = new Calories(223.0)
+              }
+              ```
+              <br>
+
+              ```scala
+              def consume[A](item: A)(consumable: Comsumable[A]) = 
+                consumable.hasCalories(item)
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Ad-Hoc Polymorphism
+              ```scala
+              trait Consumable[A] {
+                def hasCalories(consumable: A): Calories
+              }
+
+              implicit object CoffeeConsumable extends Consumable[Coffee] {
+                def hasCalories(consumable: Coffee) = new Calories(10.5)
+              }
+              ```
+              <br>
+
+              ```scala
+              def consume[A](item: A)(implicit consumable: Comsumable[A]) = 
+                consumable.hasCalories(item)
+              ```
+            </script>
+          </section>
+        </section>
+
+
+        <section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Recursive Type
+              ```scala
+              trait Beverage[A] {
+                def create(): A
+              }
+
+              class Coffee extends Beverage[Coffee]
+
+              class Tea extends Beverage[Tea]
+              ```
+              <br>
+              ```scala
+              class Water
+
+              // valid
+              class Coffee extends Beverage[Water]
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Recursive Type
+              Constraints the subtypes to themselves using bounds.
+              ```scala
+              trait Beverage[A <: Beverage[A]] {
+                def create(): A
+              }
+
+              class Coffee extends Beverage[Coffee]
+
+              class Tea extends Beverage[Tea]
+              ```
+              <br>
+              ```scala
+              // compilation error
+              class Coffee extends Beverage[Water]
+
+              // valid
+              class Tea extends Beverage[Coffee]
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Self Type
+              ```scala
+              trait Beverage[A <: Beverage[A]] { self: A =>
+                def create(): A
+              }
+
+              class Coffee extends Beverage[Coffee]
+
+              class Tea extends Beverage[Tea]
+              ```
+              Ensures that any class that extends ``Beverage`` is of type ``A``.
+
+              <br>
+              ```scala
+              // compilation error
+              class Tea extends Beverage[Coffee]
               ```
             </script>
           </section>
@@ -389,49 +394,28 @@
         <section>
           <section data-markdown>
             <script type="text/template">
-              ## Ad-Hoc Polymorphism
+              ## Phantom Types
 
               ```scala
-              trait Writer[+A] {
-                def write: A
-              }
+              sealed trait MachineStatus
+              trait On extends MachineStatus
+              trait Off extends MachineStatus
 
-              case class IntegerWriter(i: Integer) extends Writer[Integer] {
-                def write = i.toString
-              }
+              class Machine[Status <: MachineStatus]
+
+              def turnOnMachine(m:Machine[Off]) = new Machine[On]
+
+              def turnOffMachine(m:Machine[On])= new Machine[Off]
               ```
-            </script>
-          </section>
-          <section data-markdown>
-            <script type="text/template">
-              ## Ad-Hoc Polymorphism
 
               ```scala
-              List(1, 2, 3, ...)
-              List(1.5, 2.5, 3.5, ...)
+              val machine = new Machine[Off]
 
-              trait Product[A] {
-                def identity: A
-                def operation(a: A, b: A): A
-              }
-              ```
-            </script>
-          </section>
-        </section>
+              val on = turnOnMachine(machine)
 
-        <section>
-          <section data-markdown>
-            <script type="text/template">
-              ## Phantom Types and Bounds
+              val off = turnOffMachine(on)
 
-              ```scala
-              trait Writer[A] {
-                def write: A
-              }
-
-              case class IntegerWriter(i: Integer) extends Writer[Integer] {
-                def write = i.toString
-              }
+              turnOnMachine(on)     // Type Mismatch Error
               ```
             </script>
           </section>
@@ -441,15 +425,24 @@
           <section data-markdown>
             <script type="text/template">
               ## Structural Type
+              Type safe duck typing.
+              ```scala
+              def quacker(duck: {def quack(value: String): String}) {
+                println (duck.quack("Quack quack"))
+              }
+              ```
 
               ```scala
-              trait Writer[A] {
-                def write: A
+              object Duck {
+                def quack(value: String) = value.toUpperCase
               }
 
-              case class IntegerWriter(i: Integer) extends Writer[Integer] {
-                def write = i.toString
+              object NotADuck {
+                def quack(value: String) = value.toLowerCase              }
               }
+
+              quacker(Duck)       // QUACK QUACK
+              quacker(NotADuck)   // quack quack
               ```
             </script>
           </section>
@@ -458,27 +451,46 @@
         <section>
           <section data-markdown>
             <script type="text/template">
-              ## Path Dependent Type and Type Projection
+              ## Path Dependent Type
+              Type-check on a type internal to another class.
 
               ```scala
-              trait Writer[A] {
-                def write: A
+              class Parent {
+                class Child
               }
 
-              case class IntegerWriter(i: Integer) extends Writer[Integer] {
-                def write = i.toString
+              class ChildrenContainer(p: Parent) {
+                type ChildType = p.Child
+
+                def add(c: ChildType) = // Implementation here
+              }
+              ```
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Type Projection
+              Makes it possible for us to refer to the inner class without restricting it to a particular outer class instance.
+
+              ```scala
+              class Parent {
+                class Child
+              }
+
+              class ChildrenContainer(p: Parent) {
+                type ChildType = p.Child
+
+                def add(c: ChildType) = // Implementation here
               }
               ```
             </script>
           </section>
         </section>
 
-
-        <section style="text-align: left;">
+        <section>
           <h1>THE END</h1>
-          <p>
-            - <a href="http://slides.com">Try the online editor</a> <br>
-            - <a href="https://github.com/hakimel/reveal.js">Source code &amp; documentation</a>
+          <p style="text-align: left;">
+            <a href="https://github.com/hakimel/reveal.js">Source code &amp; documentation</a>
           </p>
         </section>
 

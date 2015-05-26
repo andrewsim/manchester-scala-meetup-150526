@@ -332,7 +332,6 @@
               }
 
               consume(new Coffee)          // Calories(10.5)
-
               consume(new Tea)             // Compilation Error
               ```
               <!-- .element: class="fragment" data-fragment-index="2" -->
@@ -528,30 +527,33 @@
               ```
             </script>
           </section>
-          <section data-markdown>
-            <script type="text/template">
-              ## Type Projection
-              Makes it possible for us to refer to the inner class without restricting it to a particular outer class instance.
+          <!-- <section data-markdown> -->
+          <!--   <script type="text/template"> -->
+          <!--     ## Type Projection -->
+          <!--     Makes it possible for us to refer to the inner class without restricting it to a particular outer class instance. -->
 
-              ```scala
-              class Parent {
-                class Child
-              }
+          <!--     ```scala -->
+          <!--     class Parent { -->
+          <!--       class Child -->
+          <!--     } -->
 
-              class ChildrenContainer(p: Parent) {
-                type ChildType = p.Child
+          <!--     class ChildrenContainer(p: Parent) { -->
+          <!--       type ChildType = p.Child -->
 
-                def add(c: ChildType) = // Implementation here
-              }
-              ```
-            </script>
-          </section>
+          <!--       def add(c: ChildType) = // Implementation here -->
+          <!--     } -->
+          <!--     ``` -->
+          <!--   </script> -->
+          <!-- </section> -->
         </section>
 
         <section>
           <h1>THE END</h1>
+          <br>
           <p style="text-align: left;">
-            <a href="https://github.com/hakimel/reveal.js">Source code &amp; documentation</a>
+            <small>
+              Slides: <a href="http://andrewsim.github.io/manchester-scala-meetup-150526/#/2">http://andrewsim.github.io/manchester-scala-meetup-150526</a>
+            </small>
           </p>
         </section>
 

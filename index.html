@@ -93,6 +93,7 @@
           <section data-markdown>
             <script type="text/template">
               ## Type Parameters
+              Allow us to write generic classes and traits.
               ```scala
               trait Beverage {
                 def create(): Beverage
@@ -106,7 +107,6 @@
                 def create() = new Tea
               }
               ```
-              Allow us to write generic classes and traits.
               <br>
               ```scala
               trait Beverage[A] {

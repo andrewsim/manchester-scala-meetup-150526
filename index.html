@@ -95,20 +95,6 @@
               ## Type Parameters
               Allow us to write generic classes and traits.
               ```scala
-              trait Beverage {
-                def create(): Beverage
-              }
-
-              class Coffee extends Beverage {
-                def create() = new Coffee
-              }
-
-              class Tea extends Beverage {
-                def create() = new Tea
-              }
-              ```
-              <br>
-              ```scala
               trait Beverage[A] {
                 def create(): A
               }

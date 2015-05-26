@@ -47,48 +47,28 @@
               val coffee: Coffee = new Coffee
               val tea: Coffee = new Tea
               ```
-            </script>
-          </section>
-          <section data-markdown>
-            <script type="text/template">
-              ## Basics
-              Types in Scala are __strong__
-              ```scala
-              class Coffee
-              class Tea
 
+              Types in Scala are 
+              <!-- .element: class="fragment" data-fragment-index="1" -->
+              __strong__
+              <!-- .element: class="fragment" data-fragment-index="1" -->
+              ```scala
               var coffee: Coffee = new Coffee
-              coffee = new Tea
+              coffee = new Tea        // Compilation error
               ```
-            </script>
-          </section>
-          <section data-markdown>
-            <script type="text/template">
-              ## Basics
-              Types in Scala can be __inferred__
-              ```scala
-              class Coffee
-              class Tea
+              <!-- .element: class="fragment" data-fragment-index="1" -->
 
+              Types in Scala can be 
+              <!-- .element: class="fragment" data-fragment-index="2" -->
+              __inferred__
+              <!-- .element: class="fragment" data-fragment-index="2" -->
+              ```scala
               val coffee = new Coffee
               val tea = new Tea
 
               def describe(coffee: Coffee) = "Aromatic"
               ```
-            </script>
-          </section>
-          <section data-markdown>
-            <script type="text/template">
-              ## Class
-              ```scala
-              class Coffee {
-                def create(): Coffee
-              }
-
-              class Tea {
-                def create(): Tea
-              }
-              ```
+              <!-- .element: class="fragment" data-fragment-index="2" -->
             </script>
           </section>
           <section data-markdown>
@@ -113,16 +93,33 @@
           <section data-markdown>
             <script type="text/template">
               ## Type Parameters
+              ```scala
+              trait Beverage {
+                def create(): Beverage
+              }
+
+              class Coffee extends Beverage {
+                def create() = new Coffee
+              }
+
+              class Tea extends Beverage {
+                def create() = new Tea
+              }
+              ```
               Allow us to write generic classes and traits.
+              <br>
               ```scala
               trait Beverage[A] {
                 def create(): A
               }
-
+              ```
+              <!-- .element: class="fragment" data-fragment-index="1" -->
+              ```scala
               class Coffee extends Beverage[Coffee]
 
               class Tea extends Beverage[Tea]
               ```
+              <!-- .element: class="fragment" data-fragment-index="2" -->
             </script>
           </section>
           <section data-markdown>
@@ -152,12 +149,14 @@
               val x: Map[String, Int]
               ```
               We can make it more readable by writing: 
+              <!-- .element: class="fragment" data-fragment-index="2" -->
               ```scala
               type Task = String
               type HoursSpent = Int
 
               val y: Map[Task, HoursSpent]
               ```
+              <!-- .element: class="fragment" data-fragment-index="2" -->
             </script>
           </section>
         </section>
@@ -173,83 +172,79 @@
               // ..., -2, -1, 0, 1, 2, ...
               class Integer extends NaturalNumber 
 
-              trait Reader[NaturalNumber] {
-                def read(): NaturalNumber
+              class Reader[A] {
+                def read(): A
               }
-
-              class NaturalNumberReader extends Reader[NaturalNumber]
-
-              class IntegerReader extends Reader[Integer]
               ```
 
               ```scala
-              val r_natural: NaturalNumberReader = new NaturalNumberReader {
-                def read(): NaturalNumber = /// Implementation here
-              }
+              val r_nat = new Reader[NaturalNumber]
 
-              val r_integer: IntegerReader = new IntegerReader {
-                def read(): Integer = /// Implementation here
-              }
+              val r_int = new Reader[Integer]
               ```
             </script>
           </section>
           <section data-markdown>
             <script type="text/template">
               ## In-Variant
+              ```scala
+              val r_nat = new Reader[NaturalNumber]
+              val r_int = new Reader[Integer]
+              ```
+
               By default, Type Parameter in Scala is ___In-Variant___.
               ```scala
-              val r1: IntegerReader = r_integer
+              val r1: Reader[NaturalNumber] = r_nat
 
-              val r2: NaturalNumberReader = r_natural
+              val r2: Reader[NaturalNumber] = r_int   // Compilation error
 
-              val n: NaturalNumber = new Integer        // Valid
-              val r3: NaturalNumberReader = r_integer   // Compilation error
-
-              val r4: IntegerReader = r_natural         // Compilation error
+              val r3: Reader[Integer] = r_nat         // Compilation error
               ```
+              <!-- .element: class="fragment" data-fragment-index="2" -->
             </script>
           </section>
           <section data-markdown>
             <script type="text/template">
               ## Co-Variant
-              If ``Integer`` extends ``NaturalNumber``, then ``Reader[Integer]`` extends ``Reader[NaturalNumber]``.
               ```scala
-              // 0, 1, 2, ...
               class NaturalNumber
-              // ..., -2, -1, 0, 1, 2, ...
               class Integer extends NaturalNumber 
 
-              trait Reader[+NaturalNumber] {
-                def read(): NaturalNumber
+              class Reader[+A] {
+                def read(): A
               }
-
-              class NaturalNumberReader extends Reader[NaturalNumber]
-              class IntegerReader extends Reader[Integer]
               ```
+              If ``A`` extends ``B``, then ``M[A]`` extends ``M[B]``.
 
               ```scala
-              val r_integer: IntegerReader = new IntegerReader {
-                def read(): Integer = /// Implementation here
-              }
+              val r_int = new Reader[Integer]
 
-              val r: NaturalNumberReader = r_integer
+              val r: Reader[NaturalNumber] = r_int  // valid
               ```
+              <!-- .element: class="fragment" data-fragment-index="2" -->
             </script>
           </section>
           <section data-markdown>
             <script type="text/template">
               ## Contra-Variant
-              If ``Integer`` is a subtype of ``NaturalNumber`` then ``Writer[NaturalNumber]`` is a subtype of ``Writer[Integer]``.
               ```scala
               // 0, 1, 2, ...
               class NaturalNumber
               // ..., -2, -1, 0, 1, 2, ...
               class Integer extends NaturalNumber 
 
-              trait Writer[-NaturalNumber] {
+              class Writer[-A] {
                 def write(): Unit
               }
               ```
+              If ``A`` extends ``B``, then ``M[B]`` extends ``M[A]``.
+
+              ```scala
+              val w_nat = new Writer[NaturalNumber]
+
+              val w_int: Writer[Integer] = w_nat  // valid
+              ```
+              <!-- .element: class="fragment" data-fragment-index="2" -->
             </script>
           </section>
         </section>
@@ -267,23 +262,36 @@
 
               class Calories(val value: Double)
               ```
-              <br>
+              Say we want to define functions that will return the 
+              <!-- .element: class="fragment" data-fragment-index="1" -->
+              ``Calories`` gained by consuming a product.
+              <!-- .element: class="fragment" data-fragment-index="1" -->
 
               ```scala
               def consumeCoffee(coffee: Coffee) = new Calories(10.5)
 
               def consumeCake(cake: Cake) = new Calories(223.0)
               ```
+              <!-- .element: class="fragment" data-fragment-index="2" -->
             </script>
           </section>
           <section data-markdown>
             <script type="text/template">
               ## Ad-Hoc Polymorphism
+              Let's make it reusable.
               ```scala
               trait Consumable[A] {
                 def hasCalories(consumable: A): Calories
               }
 
+              def consume[A](item: A)(consumable: Comsumable[A]) = 
+                consumable.hasCalories(item)
+              ```
+              <!-- .element: class="fragment" data-fragment-index="1" -->
+
+              To use it:
+              <!-- .element: class="fragment" data-fragment-index="2" -->
+              ```scala
               object CoffeeConsumable extends Consumable[Coffee] {
                 def hasCalories(consumable: Coffee) = new Calories(10.5)
               }
@@ -291,33 +299,43 @@
               object CakeConsumable extends Consumable[Cake] {
                 def hasCalories(consumable: Cake) = new Calories(223.0)
               }
-              ```
-              <br>
 
-              ```scala
-              def consume[A](item: A)(consumable: Comsumable[A]) = 
-                consumable.hasCalories(item)
+              consume(new Coffee)(CoffeeConsumable)       // Calories(10.5)
               ```
+              <!-- .element: class="fragment" data-fragment-index="2" -->
             </script>
           </section>
           <section data-markdown>
             <script type="text/template">
               ## Ad-Hoc Polymorphism
+              Wouldn't it be better if we do not have to always pass in ``Consumable`` explicitly?
+
+              Scala 
+              <!-- .element: class="fragment" data-fragment-index="0" -->
+              ``implicit`` to the rescue,
+              <!-- .element: class="fragment" data-fragment-index="0" -->
               ```scala
               trait Consumable[A] {
                 def hasCalories(consumable: A): Calories
               }
 
-              implicit object CoffeeConsumable extends Consumable[Coffee] {
-                def hasCalories(consumable: Coffee) = new Calories(10.5)
-              }
-              ```
-              <br>
-
-              ```scala
               def consume[A](item: A)(implicit consumable: Comsumable[A]) = 
                 consumable.hasCalories(item)
               ```
+              <!-- .element: class="fragment" data-fragment-index="1" -->
+
+              To use it,
+              <!-- .element: class="fragment" data-fragment-index="2" -->
+              ```scala
+              implicit object CoffeeConsumable extends Consumable[Coffee] {
+                def hasCalories(consumable: Coffee) = new Calories(10.5)
+              }
+
+              consume(new Coffee)          // Calories(10.5)
+
+              consume(new Tea)             // Compilation Error
+              ```
+              <!-- .element: class="fragment" data-fragment-index="2" -->
             </script>
           </section>
         </section>
@@ -327,6 +345,7 @@
           <section data-markdown>
             <script type="text/template">
               ## Recursive Type
+              Say we have the following definition,
               ```scala
               trait Beverage[A] {
                 def create(): A
@@ -336,13 +355,16 @@
 
               class Tea extends Beverage[Tea]
               ```
-              <br>
+
+              Seems fine, only problem, 
+              <!-- .element: class="fragment" data-fragment-index="1" -->
               ```scala
               class Water
 
               // valid
               class Coffee extends Beverage[Water]
               ```
+              <!-- .element: class="fragment" data-fragment-index="2" -->
             </script>
           </section>
           <section data-markdown>
@@ -355,38 +377,52 @@
               }
 
               class Coffee extends Beverage[Coffee]
-
               class Tea extends Beverage[Tea]
-              ```
-              <br>
-              ```scala
+
               // compilation error
               class Coffee extends Beverage[Water]
-
-              // valid
-              class Tea extends Beverage[Coffee]
               ```
+              <!-- .element: class="fragment" data-fragment-index="1" -->
+              Any 
+              <!-- .element: class="fragment" data-fragment-index="1" -->
+              ``A`` when extending 
+              <!-- .element: class="fragment" data-fragment-index="1" -->
+              ``Beverage[A <: Beverage[A]]`` has to be subclass of 
+              <!-- .element: class="fragment" data-fragment-index="1" -->
+              ``Beverage``.
+              <!-- .element: class="fragment" data-fragment-index="1" -->
+
+              But there's still one problem,
+              <!-- .element: class="fragment" data-fragment-index="2" -->
+
+              ```scala
+              // valid
+              class Water extends Beverage[Coffee]
+              ```
+              <!-- .element: class="fragment" data-fragment-index="3" -->
             </script>
           </section>
           <section data-markdown>
             <script type="text/template">
               ## Self Type
+              ``(self: A =>)`` ensures that any sub-classes are of type ``A``.
               ```scala
               trait Beverage[A <: Beverage[A]] { self: A =>
                 def create(): A
               }
 
               class Coffee extends Beverage[Coffee]
-
               class Tea extends Beverage[Tea]
               ```
-              Ensures that any class that extends ``Beverage`` is of type ``A``.
+              <!-- .element: class="fragment" data-fragment-index="1" -->
 
-              <br>
+              So this will give compilation error, 
+              <!-- .element: class="fragment" data-fragment-index="2" -->
               ```scala
               // compilation error
-              class Tea extends Beverage[Coffee]
+              class Water extends Beverage[Coffee]
               ```
+              <!-- .element: class="fragment" data-fragment-index="2" -->
             </script>
           </section>
         </section>
@@ -395,6 +431,7 @@
           <section data-markdown>
             <script type="text/template">
               ## Phantom Types
+              Types that are not instantiated ever.
 
               ```scala
               sealed trait MachineStatus
@@ -402,21 +439,45 @@
               trait Off extends MachineStatus
 
               class Machine[Status <: MachineStatus]
-
-              def turnOnMachine(m:Machine[Off]) = new Machine[On]
-
-              def turnOffMachine(m:Machine[On])= new Machine[Off]
               ```
+              <!-- .element: class="fragment" data-fragment-index="1" -->
+
+              ```scala
+              val machine = new Machine[Off]
+              ```
+              <!-- .element: class="fragment" data-fragment-index="2" -->
+            </script>
+          </section>
+          <section data-markdown>
+            <script type="text/template">
+              ## Phantom Types
+              Used to enforce some logic using types.
+
+              ```scala
+              sealed trait MachineStatus
+              trait On extends MachineStatus
+              trait Off extends MachineStatus
+
+              class Machine[Status <: MachineStatus]
+              ```
+              <!-- .element: class="fragment" data-fragment-index="1" -->
+              We can define a 
+              <!-- .element: class="fragment" data-fragment-index="1" -->
+              ``turnOnMachine`` function that is only applicable to machines that were turned off.
+              <!-- .element: class="fragment" data-fragment-index="1" -->
+              ```scala
+              def turnOnMachine(m:Machine[Off]) = new Machine[On]
+              ```
+              <!-- .element: class="fragment" data-fragment-index="2" -->
 
               ```scala
               val machine = new Machine[Off]
 
               val on = turnOnMachine(machine)
 
-              val off = turnOffMachine(on)
-
               turnOnMachine(on)     // Type Mismatch Error
               ```
+              <!-- .element: class="fragment" data-fragment-index="3" -->
             </script>
           </section>
         </section>

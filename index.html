@@ -495,45 +495,6 @@
         </section>
 
         <section>
-          <section data-markdown>
-            <script type="text/template">
-              ## Path Dependent Type
-              Type-check on a type internal to another class.
-
-              ```scala
-              class Parent {
-                class Child
-              }
-
-              class ChildrenContainer(p: Parent) {
-                type ChildType = p.Child
-
-                def add(c: ChildType) = // Implementation here
-              }
-              ```
-            </script>
-          </section>
-          <!-- <section data-markdown> -->
-          <!--   <script type="text/template"> -->
-          <!--     ## Type Projection -->
-          <!--     Makes it possible for us to refer to the inner class without restricting it to a particular outer class instance. -->
-
-          <!--     ```scala -->
-          <!--     class Parent { -->
-          <!--       class Child -->
-          <!--     } -->
-
-          <!--     class ChildrenContainer(p: Parent) { -->
-          <!--       type ChildType = p.Child -->
-
-          <!--       def add(c: ChildType) = // Implementation here -->
-          <!--     } -->
-          <!--     ``` -->
-          <!--   </script> -->
-          <!-- </section> -->
-        </section>
-
-        <section>
           <h1>THE END</h1>
           <br>
           <p style="text-align: left;">
